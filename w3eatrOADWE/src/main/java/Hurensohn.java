@@ -1,6 +1,6 @@
 public class Hurensohn {
 
-    public static int getResult() {
+    public Integer getResult() {
         return 1+10;
     }
 
