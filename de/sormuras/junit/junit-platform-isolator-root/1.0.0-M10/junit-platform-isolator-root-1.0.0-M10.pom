@@ -1,0 +1,191 @@
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>de.sormuras.junit</groupId>
+    <artifactId>junit-platform-isolator-root</artifactId>
+    <version>1.0.0-M10</version>
+    <packaging>pom</packaging>
+
+    <name>JUnit Platform Isolator</name>
+    <description>Launch JUnit Platform In Isolation</description>
+    <url>https://github.com/sormuras/junit-platform-isolator</url>
+    <scm>
+        <url>https://github.com/sormuras/junit-platform-isolator.git</url>
+    </scm>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <junit.platform.version>1.4.0-M1</junit.platform.version>
+        <junit.jupiter.version>5.4.0-M1</junit.jupiter.version>
+    </properties>
+
+    <modules>
+        <!-- Multi-release Java archive modules -->
+        <module>junit-platform-isolator-base-8</module>
+        <module>junit-platform-isolator-java-11</module>
+        <module>junit-platform-isolator</module>
+        <!-- Decoupled worker module, loadable in an isolated environment -->
+        <module>junit-platform-isolator-worker</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Maven Plugins: group = 'org.apache.maven.plugins' -->
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>3.0.0-M1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.1.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.0.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.0.1</version>
+                </plugin>
+                <!-- Google Java Format -->
+                <plugin>
+                    <groupId>com.coveo</groupId>
+                    <artifactId>fmt-maven-plugin</artifactId>
+                    <version>2.6.0</version>
+                    <executions>
+                        <execution>
+                            <id>check</id>
+                            <phase>initialize</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>de.sormuras.junit</groupId>
+                <artifactId>junit-platform-maven-plugin</artifactId>
+                <version>1.0.0-M3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <executor>JAVA</executor>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>javadoc</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <force>true</force>
+                    <failOnError>false</failOnError>
+                    <detectOfflineLinks>false</detectOfflineLinks>
+                    <quiet>true</quiet>
+                    <doclint>none</doclint>
+                    <additionalOptions>
+                        <additionalOption>-html5</additionalOption>
+                    </additionalOptions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <developers>
+        <developer>
+            <name>Christian Stein</name>
+            <id>sormuras</id>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <distributionManagement>
+        <repository>
+            <id>bintray-sormuras-maven</id>
+            <name>sormuras-maven</name>
+            <url>https://api.bintray.com/maven/sormuras/maven/junit-platform-isolator/;publish=1</url>
+        </repository>
+    </distributionManagement>
+
+    <!--
+    TODO Automate parts of release steps
+        1. . clean + /tests clean
+        2. Replace in Path "X.Y.Z-SNAPSHOT" with "X.Y.Z" (6x pom.xml, 3x *.java)
+        3. . clean format install
+        4. tests/ clean format verify
+        5. Commit and tag "X.Y.Z"
+        6. . deploy
+        7. Push with all tags
+        8. Revert 2. or Replace in Path "X.Y.Z" with "next-SNAPSHOT" (6x pom.xml, 3x *.java)
+        9. Commit and Push
+        -
+        10. Sync to Maven Central https://bintray.com/sormuras/maven/junit-platform-isolator/ X.Y.Z
+        11. Create Release at https://github.com/sormuras/junit-platform-isolator/tags /X.Y.Z
+    -->
+
+</project>
